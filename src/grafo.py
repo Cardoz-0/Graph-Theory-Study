@@ -1,6 +1,8 @@
 import sys
+import copy
 import networkx as nx
 import matplotlib.pyplot as plt
+from random import randint
 
 class Graph:
     def __init__(self, directed=False):
@@ -20,7 +22,7 @@ class Graph:
         return self.__directed
 
     def degree(self, vertice):
-        return len(ertice.getNeighbours)
+        return len(vertice.getNeighbours)
 
     def label(self, vertice):
         pass
@@ -30,7 +32,7 @@ class Graph:
 
     def hasEdge(self, vertice1, vertice2):
         edges = vertice1.getEdges()
-        for edge in edges:
+        for edge in edge:
             v = edge.vertice2
             if (v == vertice2):
                 return true
@@ -112,7 +114,66 @@ class Graph:
                 visited.append(vertice)
 
     # Hierholzer Algorithm
-    def detectEulerianCircle(self):
+    def detectEulerianCircle(self,  v, C):
+        ciclo = [v]
+
+        print("oi 1")
+        t = v 
+        
+        print(self.neighbours(v))
+        print(len(self.neighbours(v)))
+        while (True):
+            for i in range(len(self.neighbours(v))):
+                print(i) 
+                print(C[i])
+                
+                if C[i] == False:
+                    print("oi 2")
+                    break
+                else:
+                    print("oi 0")
+                    return False
+                
+                C[v] = True
+                v = i
+                ciclo.append(v)
+                
+                if v == t: 
+                    break
+        
+        nonvisited_vertices = []
+
+        print("oi 1")
+
+        for elem in set(ciclo):
+            nonvisited_neighbours = [ j for j  in self.neighbours(elem) if C[elem] == false]
+            if len(nonvisited_neighbours) > 0:
+                nonvisited_vertices.append(elem)
+        
+        for vert in nonvisited_vertices:
+            subciclo = detectEulerianCircle(G, vert, C)
+
+            if subciclo == False: return False
+
+            vert_index = ciclo.index(vert)
+            ciclo = ciclo[:vert_index] + subclico + ciclo[vert_index+1:]
+
+        return ciclo
+    
+    def EulerianCircle(self):
+        C = copy.copy(self.__edges)
+        for k in range(len(C)):
+            C[k] = False
+
+        v = randint(1, self.qtdVertices())
+
+        search = self.detectEulerianCircle(self.__vertices[v], C)
+
+        if not all(C):
+           return False
+        
+        else:
+            return search
 
 
 
