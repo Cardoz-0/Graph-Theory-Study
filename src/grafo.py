@@ -54,11 +54,11 @@ class Graph:
         self.__qtdVertices = int(txt[0].replace("*vertices ", ""))
 
         end_of_vertices = txt.index("*edges\n")
-        
+
         for i in range(1, end_of_vertices): # Vertice loader
             vertice_name = txt[i].replace(str(i)+' ', "").replace('"', "").replace("\n", "")
             self.__vertices.append(Vertice(vertice_name))
-        
+
         for i in range(end_of_vertices+1, len(txt)): # Edge Loader
             values = txt[i].replace("\n", "").split(" ")
             index1 = int(values[0])-1
@@ -68,7 +68,7 @@ class Graph:
             self.__vertices[index1].addEdge(edge, self.isDirected)
             self.__edges.append(edge)
             # self.__vertices[int(values[0])+1].addEdge(self.__vertices[int(values[1])+1], self.__directed)
-            
+
     def render(self):
         G = nx.Graph()
 
@@ -90,7 +90,7 @@ class Graph:
 
         # Set margins for the axes so that nodes aren't clipped
         ax = plt.gca()
-        
+
         ax.margins(0.20)
         plt.axis("off")
         plt.show()
@@ -118,29 +118,29 @@ class Graph:
         ciclo = [v]
 
         print("oi 1")
-        t = v 
-        
+        t = v
+
         print(self.neighbours(v))
         print(len(self.neighbours(v)))
         while (True):
             for i in range(len(self.neighbours(v))):
-                print(i) 
+                print(i)
                 print(C[i])
-                
+
                 if C[i] == False:
                     print("oi 2")
                     break
                 else:
                     print("oi 0")
                     return False
-                
+
                 C[v] = True
                 v = i
                 ciclo.append(v)
-                
-                if v == t: 
+
+                if v == t:
                     break
-        
+
         nonvisited_vertices = []
 
         print("oi 1")
@@ -149,7 +149,7 @@ class Graph:
             nonvisited_neighbours = [ j for j  in self.neighbours(elem) if C[elem] == false]
             if len(nonvisited_neighbours) > 0:
                 nonvisited_vertices.append(elem)
-        
+
         for vert in nonvisited_vertices:
             subciclo = detectEulerianCircle(G, vert, C)
 
@@ -159,7 +159,7 @@ class Graph:
             ciclo = ciclo[:vert_index] + subclico + ciclo[vert_index+1:]
 
         return ciclo
-    
+
     def EulerianCircle(self):
         C = copy.copy(self.__edges)
         for k in range(len(C)):
@@ -171,10 +171,36 @@ class Graph:
 
         if not all(C):
            return False
-        
+
         else:
             return search
 
+    def floydWarshall(self):
+        nVert = self.qtdVertices()
+        distances= [[99999 for i in range(nVert)] for j in range(nVert)]
+
+        for vertice in range(nVert):
+            distances[vertice][vertice] = 0
+
+        for i in range(len(self.__edges)):
+                print(self.__edges[i][1])
+
+#            distances[edge.vertice1 -1][edge.vertice2-1] = edge[2]
+#            distances[edge.vertice2-1][edge.vertice1-1] = edge[2]
+
+        for i in range(len(distances)):
+            for row in range(len(distances)):
+                for collumn in range(len(distances[row])):
+                    distances[row][collumn] = min(
+                                            distances[row][collumn],
+                                            distances[row][i] +
+                                            distances[i][collumn]
+                    )
+
+        Tlines = 1
+        for i in distances:
+            print(str(Tlines) + ":", str(i)[1:+1])
+            Tlines += 1
 
 
 class Vertice:
@@ -192,13 +218,13 @@ class Vertice:
         neighbours = []
         for edge in self.__edges:
             neighbours.append(edge.vertice2)
-        return neighbours 
+        return neighbours
 
     def addEdge(self, edge, directed):
         self.__edges.append(edge)
         if not directed:
             edge.vertice2.addEdge(self, Edge(edge.vertice2, edge.vertice1), True) # Adiciona sem se readicionar
-        
+
     def removeEdge(self, edge):
         if edge in self.__edges: self.__edges.remove(edge) # Condição para que essa função possa ser usada para grafos ordenados ou não ordenados
 
@@ -211,7 +237,7 @@ class Edge:
 
     def getWeight(self):
         return self.__weight
-    
+
     def destroyEdge(self): #Pode ser usado se for ordenado ou não
         self.__vertice1.removeEdge(self.__vertice2)
         self.__vertice2.removeEdge(self.__vertice1)
