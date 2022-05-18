@@ -97,22 +97,29 @@ class Graph:
 
     def getVertice(self, index):
         return self.__vertices[index]
+    
+    def queue_to_index_list(self, queue, visited):
+        indexes = []
+        for item in queue:
+            if not (item in visited):
+                indexes.append(self.__vertices.index(item))
+        return indexes
 
     # Breadth-First Search
     def searchBFS(self, index):
         visited = [self.getVertice(index)]
         queue = self.__vertices[index].getNeighbours()
-        print("Buscando elemento " + self.__vertices[index].getName())
-        depth = 0
+        print("0: " + str(self.queue_to_index_list(queue, [])))
+        depth = 1
 
         while len(queue) != 0:
             vertice = queue.pop(0)
             if not (vertice in visited):
-                print(str(depth) + "-Buscando elemento " + vertice.getName())
+                print(str(depth) + ": " + str(self.queue_to_index_list(vertice.getNeighbours(), visited)))
                 depth += 1
                 queue.extend(vertice.getNeighbours())
                 visited.append(vertice)
-
+        print(str(self.queue_to_index_list(visited, [])))
     # Hierholzer Algorithm
     def detectEulerianCircle(self,  v, C):
         ciclo = [v]

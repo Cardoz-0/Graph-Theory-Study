@@ -5,7 +5,7 @@ grafo = Graph()
 grafo.load("./tests/caminho_minimo/fln_pequena.net")
 #grafo.render()
 
-#grafo.searchBFS(0)
+grafo.searchBFS(0)
 
 #Eulerian Circle
 #result = grafo.EulerianCircle()
@@ -17,4 +17,4 @@ grafo.load("./tests/caminho_minimo/fln_pequena.net")
 #else:
  #   print(0)
 
-grafo.floydWarshall()
+# grafo.floydWarshall()
