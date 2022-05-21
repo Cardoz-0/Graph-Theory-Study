@@ -5,18 +5,22 @@ import matplotlib.pyplot as plt
 from random import randint
 
 class Graph:
-    def __init__(self, directed=False):
+    def __init__(self, directed):
         self.__vertices = []
-        self.__edges = []
         self.__weight = []
         self.__directed = directed
 
+    def getEdges(self):
+        edges = []
+        for vertice in self.__vertices:
+            edges += vertice.getEdges()
+        return edges
 
     def qtdVertices(self):
         return len(self.__vertices)
 
     def qtdEdges(self):
-        return len(self.__edges)
+        return len(self.getEdges())
 
     def isDirected(self):
         return self.__directed
@@ -32,12 +36,12 @@ class Graph:
 
     def hasEdge(self, vertice1, vertice2):
         edges = vertice1.getEdges()
-        for edge in edge:
+        for edge in edges:
             v = edge.vertice2
             if (v == vertice2):
-                return true
+                return (True, edge)
 
-        return false
+        return (False, None)
 
     def weight(self, edge):
         edges = vertice1.getEdges()
@@ -65,14 +69,21 @@ class Graph:
             index2 = int(values[1])-1
             weight = str(values[2])
             edge = Edge(self.__vertices[index1], self.__vertices[index2], weight)
-            self.__vertices[index1].addEdge(edge, self.isDirected)
-            self.__edges.append(edge)
+            self.__vertices[index1].addEdge(edge, self.isDirected())
+            
             # self.__vertices[int(values[0])+1].addEdge(self.__vertices[int(values[1])+1], self.__directed)
+
+    def vertice_to_index(self, vertices):
+        returnable = []
+        for vertice in vertices:
+            index = self.__vertices.index(vertice)
+            returnable.append(index)
+        return returnable
 
     def render(self):
         G = nx.Graph()
 
-        for edge in self.__edges:
+        for edge in self.getEdges():
             G.add_edge(edge.vertice1.getName(), edge.vertice2.getName(), weight=str(edge.getWeight()))
 
         options = {
@@ -120,67 +131,63 @@ class Graph:
                 queue.extend(vertice.getNeighbours())
                 visited.append(vertice)
         print(str(self.queue_to_index_list(visited, [])))
-    # Hierholzer Algorithm
-    def detectEulerianCircle(self,  v, C):
-        ciclo = [v]
 
-        print("oi 1")
+    # Hierholzer Algorithm
+    def detect_eulerian_cicle(self):
+        visited = [False for e in self.getEdges()]
+
+        # Vertice selecionado arbitrariamente
+        vertice = self.__vertices[0]
+        
+        (r, Cicle) = self.detect_eulerian_subcicle(vertice, visited)
+
+        if r == False:
+            return (False, None)
+        else:
+            for e in visited:
+                if not(e):
+                    return(False, None)
+            return (True, Cicle)
+
+
+    def detect_eulerian_subcicle(self, v, C):
+        Ciclo = [v]
         t = v
 
-        print(self.neighbours(v))
-        print(len(self.neighbours(v)))
-        while (True):
-            for i in range(len(self.neighbours(v))):
-                print(i)
-                print(C[i])
-
-                if C[i] == False:
-                    print("oi 2")
+        while True:
+            ver_nei = True
+            for u in self.neighbours(v):
+                (has, edge) = self.hasEdge(u,v)
+                index = self.getEdges().index(edge)
+                if C[index] == False:
+                    ver_nei = False
+                    C[index] = True
+                    has_op, opposite = self.hasEdge(v,u)
+                    if has_op:
+                        index_op = self.getEdges().index(opposite)
+                        C[index_op] = True
+                    v = u
+                    Ciclo.append(v)
                     break
-                else:
-                    print("oi 0")
-                    return False
+                    
+            if ver_nei:
+                return (False, None)
+            if (v == t):
+                break
 
-                C[v] = True
-                v = i
-                ciclo.append(v)
+        for x in Ciclo:
+            for w in self.neighbours(x):
+                (has, edge) = self.hasEdge(x,w)
+                index = self.getEdges().index(edge)
 
-                if v == t:
-                    break
-
-        nonvisited_vertices = []
-
-        print("oi 1")
-
-        for elem in set(ciclo):
-            nonvisited_neighbours = [ j for j  in self.neighbours(elem) if C[elem] == false]
-            if len(nonvisited_neighbours) > 0:
-                nonvisited_vertices.append(elem)
-
-        for vert in nonvisited_vertices:
-            subciclo = detectEulerianCircle(G, vert, C)
-
-            if subciclo == False: return False
-
-            vert_index = ciclo.index(vert)
-            ciclo = ciclo[:vert_index] + subclico + ciclo[vert_index+1:]
-
-        return ciclo
-
-    def EulerianCircle(self):
-        C = copy.copy(self.__edges)
-        for k in range(len(C)):
-            C[k] = False
-
-        v = randint(1, self.qtdVertices())
-
-        search = self.detectEulerianCircle(self.__vertices[v], C)
-
-        if not all(C):
-           return False
-
-        else:
-            return search
+                if C[index] == False:
+                    (r,Aux_ciclo) = self.detect_eulerian_subcicle(x, C)
+                    if r == False:
+                        return (False, None)
+                    else:
+                        aux = Ciclo.index(x)+1
+                        Ciclo = Ciclo[:Ciclo.index(x)] + Aux_ciclo + Ciclo[aux:]
+        return (True, Ciclo)
 
     def floydWarshall(self):
         nVert = self.qtdVertices()
@@ -189,8 +196,8 @@ class Graph:
         for vertice in range(nVert):
             distances[vertice][vertice] = 0
 
-        for i in range(len(self.__edges)):
-                print(self.__edges[i][1])
+        for i in range(len(self.getEdges())):
+                print(self.getEdges()[i][1])
 
 #            distances[edge.vertice1 -1][edge.vertice2-1] = edge[2]
 #            distances[edge.vertice2-1][edge.vertice1-1] = edge[2]
@@ -229,8 +236,9 @@ class Vertice:
 
     def addEdge(self, edge, directed):
         self.__edges.append(edge)
+
         if not directed:
-            edge.vertice2.addEdge(self, Edge(edge.vertice2, edge.vertice1), True) # Adiciona sem se readicionar
+            edge.vertice2.addEdge(Edge(edge.vertice2, edge.vertice1), True) # Adiciona sem se readicionar
 
     def removeEdge(self, edge):
         if edge in self.__edges: self.__edges.remove(edge) # Condição para que essa função possa ser usada para grafos ordenados ou não ordenados

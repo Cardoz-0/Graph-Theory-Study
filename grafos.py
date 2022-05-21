@@ -1,14 +1,18 @@
 from src.grafo import Graph
 
 
-grafo = Graph()
-grafo.load("./tests/caminho_minimo/fln_pequena.net")
-#grafo.render()
+grafo = Graph(False)
+grafo.load("./tests/ciclo_euleriano/ContemCicloEuleriano.net")
+# grafo.render()
 
+print("BFS | O(|V| + |E|)")
 grafo.searchBFS(0)
 
-#Eulerian Circle
-#result = grafo.EulerianCircle()
+# Eulerian Cicle
+print("\nEulerian Cicle, Hierholzer Alg | O(|E|)")
+(result, cicle) = grafo.detect_eulerian_cicle()
+print(int(result))
+print(grafo.vertice_to_index(cicle))
 
 #print(result)
 #if result != False:
