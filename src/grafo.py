@@ -244,47 +244,38 @@ class Graph:
         
         return A, D
 
-    def print_result(self, previous_nodes, shortest_path, start_node, target_node):
+    def print_dijikstra(self, previous_nodes, shortest_path, start_node, target_node):
         path = []
         node = target_node
         
         while node != start_node:
-            path.append(node.getName())
+            path.append(str(self.vertice_to_index(node)))
             node = previous_nodes[node]
     
-        path.append(start_node.getName())
+        path.append(str(self.vertice_to_index(start_node)))
         
 
         print(" -> ".join(reversed(path))+", d={}".format(shortest_path[target_node]))
 
     def floydWarshall(self):
-        nVert = self.qtdVertices()
-        distances= [[99999 for i in range(nVert)] for j in range(nVert)]
 
-        for vertice in range(nVert):
-            distances[vertice][vertice] = 0
+        #  Matriz de valores, se utiliza um dicionario para diminuir a complexidade de memória
+        D = {x: {y: float('inf') for y in self.getVertices()} for x in self.getVertices()}
 
-        for i in range(len(self.getEdges())):
-                print(self.getEdges()[i][1])
+        for v in self.getVertices():
+            D[v][v] = 0.0
+            for n in self.neighbours(v):
+                # ((v,n)) creates edge manually
+                has, edge = self.hasEdge(v, n)
+                D[v][n] = edge.getWeight()
 
-#            distances[edge.vertice1 -1][edge.vertice2-1] = edge[2]
-#            distances[edge.vertice2-1][edge.vertice1-1] = edge[2]
-
-        for i in range(len(distances)):
-            for row in range(len(distances)):
-                for collumn in range(len(distances[row])):
-                    distances[row][collumn] = min(
-                                            distances[row][collumn],
-                                            distances[row][i] +
-                                            distances[i][collumn]
-                    )
-
-        Tlines = 1
-        for i in distances:
-            print(str(Tlines) + ":", str(i)[1:+1])
-            Tlines += 1
-
-
+        for p in self.getVertices():
+            for v in self.getVertices():
+                for w in self.getVertices():
+                    if D[v][w] > D[v][p] + D[p][w]:
+                        D[v][w] = D[v][p] + D[p][w]
+        return D
+        
 class Vertice:
     def __init__(self, name) -> None:
         self.__name = name
