@@ -12,13 +12,15 @@ grafo.searchBFS(0)
 print("\nEulerian Cicle, Hierholzer Alg | O(|E|)")
 (result, cicle) = grafo.detect_eulerian_cicle()
 print(int(result))
-print(grafo.vertice_to_index(cicle))
+print(grafo.vertices_to_index(cicle))
 
-#print(result)
-#if result != False:
-   # print(1)
-  #  print(result)
-#else:
- #   print(0)
+# Dijkstra 
+grafo = Graph(False)
+grafo.load("./tests/caminho_minimo/fln_pequena.net")
+print("\nDijkstra, Hierholzer Alg | O(log2 (n))")
+start_node = grafo.getVertice(0)
+(previous_nodes, shortest_path) = grafo.dijikstra(start_node)
+for i in range(grafo.qtdVertices()):
+    grafo.print_result(previous_nodes, shortest_path, start_node, grafo.getVertice(i))
 
 # grafo.floydWarshall()

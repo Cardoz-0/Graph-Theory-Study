@@ -29,7 +29,10 @@ class Graph:
         return len(vertice.getNeighbours)
 
     def label(self, vertice):
-        pass
+        return vertice.getName()
+    
+    def getVertices(self):
+        return self.__vertices
 
     def neighbours(self, vertice):
         return vertice.getNeighbours()
@@ -107,19 +110,28 @@ class Graph:
         plt.show()
 
     def getVertice(self, index):
-        return self.__vertices[index]
+        return self.getVertices()[index]
     
+    def vertice_to_index(self, vertice):
+        return self.getVertices().index(vertice)
+
+    def vertices_to_index(self, vertices):
+        indexes = []
+        for vert in vertices:
+            indexes.append(self.getVertices().index(vert))
+        return indexes
+
     def queue_to_index_list(self, queue, visited):
         indexes = []
         for item in queue:
             if not (item in visited):
-                indexes.append(self.__vertices.index(item))
+                indexes.append(self.getVertices().index(item))
         return indexes
 
     # Breadth-First Search
     def searchBFS(self, index):
         visited = [self.getVertice(index)]
-        queue = self.__vertices[index].getNeighbours()
+        queue = self.getVertices()[index].getNeighbours()
         print("0: " + str(self.queue_to_index_list(queue, [])))
         depth = 1
 
@@ -189,6 +201,62 @@ class Graph:
                         Ciclo = Ciclo[:Ciclo.index(x)] + Aux_ciclo + Ciclo[aux:]
         return (True, Ciclo)
 
+    def dijikstra(self, s):
+        # Nodos não visitados
+        C = list(self.getVertices())
+ 
+        # Salva o custo para visitar um nodo
+        D = {}
+    
+        # Salva o caminho mais rápido para um nodo encontrado até o momento
+        A = {}
+    
+        # "Infinito"
+        max_value = sys.maxsize
+        for node in C:
+            D[node] = max_value
+
+        # Setamos o custo inicial como 0
+        D[s] = 0
+        
+        # Visita todos os nodos
+        while C:
+            # Encontra o nodo com o menor valor
+            current_min_node = None
+            for node in C: 
+                if current_min_node == None:
+                    current_min_node = node
+                elif D[node] < D[current_min_node]:
+                    current_min_node = node
+                    
+            # Atualiza o custo de cada aresta de acordo com os vizinhos
+            neighbors = self.neighbours(current_min_node)
+            for neighbor in neighbors:
+                (has, edge) = self.hasEdge(current_min_node,neighbor)
+                tentative_value = D[current_min_node] + edge.getWeight()
+                if tentative_value < D[neighbor]:
+                    D[neighbor] = tentative_value
+                    # Atualiza o melhor caminho para o nodo atual
+                    A[neighbor] = current_min_node
+    
+            # Marca o nodo como visitado
+            C.remove(current_min_node)
+        
+        return A, D
+
+    def print_result(self, previous_nodes, shortest_path, start_node, target_node):
+        path = []
+        node = target_node
+        
+        while node != start_node:
+            path.append(node.getName())
+            node = previous_nodes[node]
+    
+        path.append(start_node.getName())
+        
+
+        print(" -> ".join(reversed(path))+", d={}".format(shortest_path[target_node]))
+
     def floydWarshall(self):
         nVert = self.qtdVertices()
         distances= [[99999 for i in range(nVert)] for j in range(nVert)]
@@ -228,6 +296,9 @@ class Vertice:
     def getEdges(self):
         return self.__edges
 
+    def __str__(self):
+        return self.getName()
+
     def getNeighbours(self):
         neighbours = []
         for edge in self.__edges:
@@ -238,20 +309,20 @@ class Vertice:
         self.__edges.append(edge)
 
         if not directed:
-            edge.vertice2.addEdge(Edge(edge.vertice2, edge.vertice1), True) # Adiciona sem se readicionar
+            edge.vertice2.addEdge(Edge(edge.vertice2, edge.vertice1, edge.getWeight()), True) # Adiciona sem se readicionar
 
     def removeEdge(self, edge):
         if edge in self.__edges: self.__edges.remove(edge) # Condição para que essa função possa ser usada para grafos ordenados ou não ordenados
 
 
 class Edge:
-    def __init__(self, vertice1, vertice2, weight=None) -> None:
+    def __init__(self, vertice1, vertice2, weight=1.0) -> None:
         self.vertice1 = vertice1
         self.vertice2 = vertice2
         self.__weight = weight
 
     def getWeight(self):
-        return self.__weight
+        return float(self.__weight)
 
     def destroyEdge(self): #Pode ser usado se for ordenado ou não
         self.__vertice1.removeEdge(self.__vertice2)
