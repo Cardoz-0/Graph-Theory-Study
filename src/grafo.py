@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 class Graph:
     def __init__(self, directed):
         self.__vertices = []
-        self.__weight = []
         self.__directed = directed
 
     def getEdges(self):
@@ -166,12 +165,10 @@ class Graph:
         t = v
 
         while True:
-            ver_nei = True
             for u in self.neighbours(v):
                 (has, edge) = self.hasEdge(u,v)
                 index = self.getEdges().index(edge)
                 if C[index] == False:
-                    ver_nei = False
                     C[index] = True
                     has_op, opposite = self.hasEdge(v,u)
                     if has_op:
@@ -180,9 +177,6 @@ class Graph:
                     v = u
                     Ciclo.append(v)
                     break
-                    
-            if ver_nei:
-                return (False, None)
             if (v == t):
                 break
 
@@ -258,7 +252,6 @@ class Graph:
 
     def floydWarshall(self):
 
-        #  Matriz de valores, se utiliza um dicionario para diminuir a complexidade de memória
         D = {x: {y: float('inf') for y in self.getVertices()} for x in self.getVertices()}
 
         for v in self.getVertices():

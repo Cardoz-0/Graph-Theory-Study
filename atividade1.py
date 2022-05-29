@@ -5,11 +5,11 @@ grafo = Graph(False)
 grafo.load("./tests/ciclo_euleriano/ContemCicloEuleriano.net")
 # grafo.render()
 
-print("BFS | O(|V| + |E|)")
+print("BFS")
 grafo.searchBFS(0)
 
 # Eulerian Cicle
-print("\nEulerian Cicle, Hierholzer Alg | O(|E|)")
+print("\nHierholzer")
 (result, cicle) = grafo.detect_eulerian_cicle()
 print(int(result))
 print(grafo.vertices_to_index(cicle))
@@ -17,7 +17,7 @@ print(grafo.vertices_to_index(cicle))
 # Dijkstra 
 grafo = Graph(False)
 grafo.load("./tests/caminho_minimo/fln_pequena.net")
-print("\nDijkstra, Hierholzer Alg | O(log2 (n))")
+print("\nDijkstra")
 start_node = grafo.getVertice(0)
 (previous_nodes, shortest_path) = grafo.dijikstra(start_node)
 for i in range(grafo.qtdVertices()):
@@ -26,7 +26,7 @@ for i in range(grafo.qtdVertices()):
 
 floyd = grafo.floydWarshall()
 
-print('Floyd Warshall | O(V³):')
+print('Floyd Warshall:')
 for key, value in floyd.items():
     distances = ""
     sort_orders = sorted(value.items(), key=lambda x: x[1], reverse=False)
