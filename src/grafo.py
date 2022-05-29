@@ -2,7 +2,6 @@ import sys
 import copy
 import networkx as nx
 import matplotlib.pyplot as plt
-from random import randint
 
 class Graph:
     def __init__(self, directed):
