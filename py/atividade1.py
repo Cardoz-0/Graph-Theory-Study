@@ -2,7 +2,7 @@ from src.grafo import Graph
 from collections import OrderedDict
 
 grafo = Graph(False)
-grafo.load("./tests/ciclo_euleriano/ContemCicloEuleriano.net")
+grafo.load("./../tests/ciclo_euleriano/ContemCicloEuleriano.net")
 # grafo.render()
 
 print("BFS")

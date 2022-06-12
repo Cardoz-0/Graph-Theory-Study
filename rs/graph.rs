@@ -1,105 +1,81 @@
+use std::fs;
+use std::io::BufReader;
+use std::io::prelude::*;
+
+struct Graph {
+    vertices: Vec<Vertex>,
+    edges: Vec<Edge>,
+}
+
+struct Edge {
+    v_pos: i32,
+    u_pos: i32,
+    w: f32,
+}
+
+struct Vertex {
+    name: String
+} 
+
+impl Graph {
+    pub fn new() -> Graph {
+        Graph {
+            vertices: Vec::new(),
+            edges: Vec::new()
+        }
+    }
+    
+    pub fn load(path: String) -> Graph {
+        let file = fs::File::open(path).expect("Não foi possível carregar arquivo");
+        let mut buf_reader = BufReader::new(file);
+        let mut contents = String::new();
+        buf_reader.read_to_string(&mut contents).expect("Não foi possível transformar arquivo em String");
+        let mut graph = Graph::new();
+        let split = contents.split("\n");
+        let mut vertices_finished = false;
+        let mut is_directed = true;
+        let graph_ref = &mut graph;
+        for line in split {
+            if line.contains("*vertices") {
+                continue;
+            }
+            if line.contains("*arcs") {
+                is_directed = false;
+                vertices_finished = true;
+                continue;
+            }
+            if line.contains("*edges") {
+                vertices_finished = true;
+                continue;
+            }
+
+            if !vertices_finished {
+                let vec: Vec<&str> = line.splitn(2, " ").collect();
+                graph_ref.add_vertex(Vertex{name: vec[1].to_string()});
+            } else {
+                let vec: Vec<&str> = line.splitn(3, " ").collect();
+                graph_ref.add_edge(vec[0].parse::<i32>().unwrap(),
+                                    vec[1].parse::<i32>().unwrap(),
+                                    vec[2].parse::<f32>().unwrap());
+                    
+                if !is_directed {graph_ref.add_edge(vec[1].parse::<i32>().unwrap(),
+                                    vec[0].parse::<i32>().unwrap(),
+                                    vec[2].parse::<f32>().unwrap())}
+            }
+        }
+        graph
+    }
+
+    pub fn add_vertex(&mut self, v: Vertex) -> () {
+        self.vertices.push(v);
+    }
+
+    pub fn add_edge(&mut self, v_pos: i32, u_pos: i32, w: f32) -> () {
+        self.edges.push(Edge{v_pos, u_pos,w});        
+    }
+}
+
 fn main() {
-    struct Graph {
-        vertices : Vec<Edge>,
-        directed : bool, 
-    }
-
-    struct Edge {
-        vertice1: Vertice,
-        vertice2: Vertice,
-        weight: i32,
-    }
-
-    struct Vertice {
-        name: std::String,
-        edges: Vec<Edge>,
-    }
-
-    
-    impl Graph {
-        pub fn new() -> Graph {
-            Graph {vertices: Vec::new(), edge: Vec::new(), weight: 0 }
-        }
-
-        pub fn get_edges(&mut self) -> usize {
-            let edges = Vec::new();
-            for i in self.vertices.iter_mut() {
-                edges += i;
-            }
-            edges
-        }
-        pub fn qtdVertices(self) -> usize {
-            self.vertices.len()
-        }
-        pub fn qtdEdges(self) -> usize {
-            self.get_edges().len()
-        }
-        
-        pub fn isDirected(self) -> bool {
-            self.directed
-        }
-        
-        pub fn degree(self, &vertice) -> //not sure yet {
-            vertice.getNeighbours()
-        }
-
-        pub fn label(self, vertice) -> std::String {
-            vertice.getName()
-        }
-        
-        pub fn getVertices(self) -> Vec<Edge> {
-            self.vertices
-        }
-
-        pub fn neighbours(self, vertice) -> //not sure yet {
-            vertice.getNeighbours()                                     
-        }
-        
-        pub fn hasEdge(self, vertice1, vertice2) -> bool, edge {
-            let edges = vertice1.getEdges();
-            for edge in edges.iter_mut() {
-                let v = edge.vertice2
-                if (v == vertice2):
-                    return (True, edge)
-            }
-            
-            return (False, None)
-        }
-
-        pub fn weight(self, edge) -> i32 {
-
-        let edges = vertice1.getEdges();
-        for edge in edges.iter_mut() {
-            let v = edge.vertice2
-            if (v == vertice2) {return edge.getWeight()}
-        }
-        
-        pub fn getVertice(self, index) {
-            self.getVertices()[index]
-        }
-        
-        pub fn vertice_to_index(self, vertice) -> Vec<vertice> {
-            let indexes = Vec::new();
-            for i in vertices {
-                indexes.push(self.getVertices().index(vert))
-            }
-        indexes
-        }
-    }
-    impl Edge {
-        pub fn new() -> Edge {
-            Edge {vertice1: Vertice::new(), vertice2: Vertice::new()}
-        }
-    }
-    
-    impl Vertice {
-        pub fn new() -> Vertice {
-            Vertice { weight: 0, edges: Vec::new() }
-        }
-    }
-    let mut graph = Graph::new();
-    let edge = Edge::new();
-    graph.set_edge(edge);
-    let len: usize = graph.get_vertices();
-    println!("{}", len);
+    let path = String::from("./../tests/dirigidos/manha.net");
+    let test = Graph::load(path);
 }
