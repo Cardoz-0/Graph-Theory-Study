@@ -71,7 +71,15 @@ impl Graph {
     }
 
     pub fn add_edge(&mut self, v_pos: i32, u_pos: i32, w: f32) -> () {
-        self.edges.push(Edge{v_pos, u_pos,w});        
+        self.edges.push(Edge{v_pos: v_pos-1, u_pos: u_pos-1,w});        
+    }
+
+    pub fn get_neighbours(self, v_pos: i32, result: &mut Vec<Edge>) -> () {
+        for edge in self.edges {
+            if edge.v_pos == v_pos {
+                result.push(edge)
+            }
+        }
     }
 }
 
@@ -79,4 +87,9 @@ fn main() {
     let path = String::from("./../tests/dirigidos/manha.net");
     let test = Graph::load(path);
     println!("Arquivo carregado com sucesso!");
+    let mut neighbours: Vec<Edge> = Vec::new();
+    test.get_neighbours(0,&mut neighbours);
+    if let Some(edge) = neighbours.pop() {
+        println!("Achou vizinho {}", edge.u_pos);
+    }
 }
