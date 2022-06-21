@@ -2,6 +2,8 @@ use std::fs;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::rc::Rc;
+use std::ops::Deref;
+use std::cmp::min;
 
 #[derive(PartialEq)]
 struct Vertex {
@@ -20,6 +22,13 @@ struct Graph {
     edges: Vec<Rc<Edge>>
 }
 
+struct VisitableNode {
+    v: Rc<Vertex>,
+    visited: bool,
+    on_stack: bool,
+    lowest: usize,
+}
+        
 impl Graph {
     pub fn new() -> Graph {
         Graph {
@@ -73,7 +82,6 @@ impl Graph {
                 let u = self.find_by_id(vec[1].parse::<usize>().unwrap());
                 let w = vec[2].parse::<f32>().unwrap();
                 self.add_edge(Rc::new(Edge{v: Rc::clone(&v), u: Rc::clone(&u), w}));
-                if !is_directed { self.add_edge(Rc::new(Edge{v: Rc::clone(&u), u: Rc::clone(&v), w })) }
             }
         }
     }
@@ -95,6 +103,63 @@ impl Graph {
         }
         result
     }
+    
+    pub fn detect_scc(&self) -> () {
+        let mut stack: Vec<VisitableNode> = Vec::new();
+        
+        for v in &self.verts {
+            stack.push(VisitableNode{
+                v: Rc::clone(&v),
+                visited: false,
+                on_stack: false,
+                lowest: 1 // Arquivos de testes utilizam 1 para indexar o primeiro elemento
+            })
+        }
+        for i in 0..stack.len() {
+            if !stack[i].visited {
+                self.dfs_scc(i, &mut stack);
+            }
+        }
+        for i in 0..stack.len() {
+            println!("{}", stack[i].lowest);
+        }
+    }
+    
+    fn dfs_scc (&self, at: usize  ,stack:&mut Vec<VisitableNode>) {
+        let mut node = &mut stack[at];
+        if node.visited == false {
+            node.visited = true;
+            node.on_stack = true;
+            node.lowest = node.v.id; 
+            
+            for neighbour in self.get_neighbours(Rc::clone(&stack[at].v)) {
+                for to in 0..stack.len() {
+                    if neighbour.id == stack.get(to).unwrap().deref().v.id {
+                        if !stack[to].visited {
+                            self.dfs_scc(to, stack);
+                        }
+                        if stack[to].on_stack { 
+                            stack[at].lowest = min(stack[at].lowest, stack[to].lowest);
+                        } 
+                        break;
+                    }
+                }
+            }
+
+            if stack[at].lowest == stack[at].v.id {
+                for i in 0..stack.len() {
+                    if stack[i].on_stack {
+                        stack[i].on_stack == false;
+                        stack[i].lowest = stack[at].v.id;
+                        if i == at {
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }
+    }
 }
 
 fn main() {
@@ -107,5 +172,6 @@ fn main() {
     for v in neighbours {
         println!("Vertex: {}, Neighbors{}", some_v.name, v.name)
     }
+    graph.detect_scc();
 }
 
