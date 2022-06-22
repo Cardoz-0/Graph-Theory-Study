@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::ops::Deref;
 use std::rc::Rc;
+use std::collections::VecDeque;
 
 #[derive(PartialEq)]
 struct Vertex {
@@ -57,6 +58,10 @@ impl Graph {
     fn find_by_id(&self, id: usize) -> Rc<Vertex> {
         self.verts.iter().find(|v| v.id == id).cloned().unwrap()
     }
+
+    fn find_by_pos(&self, pos: usize) -> Rc<Vertex> {
+        Rc::clone(&self.verts[pos])
+    }
     
     pub fn load(&mut self, path: String) {
         let file = fs::File::open(path).expect("Não foi possível carregar arquivo");
@@ -83,15 +88,20 @@ impl Graph {
 
             if !vertices_finished {
                 let vec: Vec<&str> = line.splitn(2, ' ').collect();
+
                 let v = Vertex {
-                    id: vec[0].parse::<usize>().unwrap(),
+                    id: vec[0].parse::<usize>().unwrap()-1,
                     name: vec[1].to_string(),
                 };
                 self.add_vertex(Rc::new(v));
             } else {
-                let vec: Vec<&str> = line.splitn(3, ' ').collect();
-                let v = self.find_by_id(vec[0].parse::<usize>().unwrap());
-                let u = self.find_by_id(vec[1].parse::<usize>().unwrap());
+                let vec: Vec<&str> = line.splitn(3, ' ').collect(); 
+                if vec.len() == 1 { //caso o arquivo termine com um newline
+                    continue;
+                }
+                
+                let v = self.find_by_pos(vec[0].parse::<usize>().unwrap()-1);
+                let u = self.find_by_pos(vec[1].parse::<usize>().unwrap()-1);
                 let w = vec[2].parse::<f32>().unwrap();
                 self.add_edge(Rc::new(Edge {
                     v: Rc::clone(&v),
@@ -180,14 +190,14 @@ impl Graph {
         for neighbour in self.get_neighbours(Rc::clone(&nodes[at].visitable.v)) {
             let orderable_neighbour = nodes.iter().find(|x| x.visitable.v.id == neighbour.id).unwrap();
             if !orderable_neighbour.visitable.visited {
-                last_available = self.dfs_toporder(orderable_neighbour.visitable.v.id - 1, nodes, last_available); 
+                last_available = self.dfs_toporder(orderable_neighbour.visitable.v.id, nodes, last_available); 
             }   
         }
         nodes[at].pos = last_available;
         return last_available-1;
     }
 
-    fn topological_order(&self) -> Vec<OrderedNode> {
+    pub fn topological_order(&self) -> Vec<OrderedNode> {
         let mut stack: Vec<OrderedNode> = Vec::new();
 
         for v in &self.verts {
@@ -206,6 +216,36 @@ impl Graph {
         }
         stack
     }
+
+    pub fn prims(&self, s: usize) -> (f32, Vec<Rc<Edge>>) {
+        let mut stack: Vec<VisitableNode> = Vec::new();
+
+        for v in &self.verts {
+            stack.push(VisitableNode {v: Rc::clone(&v),visited: false});
+        }
+
+        let mut mst_edges: Vec<Rc<Edge>> = Vec::new();
+        let mut pq: VecDeque<Rc<Edge>> = VecDeque::new();
+        stack[0].visited = true;
+        self.get_edges(self.find_by_id(0)).iter().for_each(
+            |e| if !stack[e.u.id].visited {pq.push_back(Rc::clone(e))}); 
+
+        let total_edges = &self.verts.len() - 1;
+        let mut mst_cost = 0.0;
+        while !pq.is_empty() && mst_edges.len() != total_edges {
+            let edge = pq.pop_front().unwrap();
+            if !stack[edge.u.id].visited {
+                mst_edges.push(Rc::clone(&edge));
+                mst_cost += edge.w;
+
+                stack[edge.u.id].visited = true;
+                self.get_edges(self.find_by_id(0)).iter().for_each(
+                    |e| if !stack[e.u.id].visited {pq.push_back(Rc::clone(e))});
+
+            }
+        }
+        (mst_cost, mst_edges)
+    }    
 }
 
 fn main() {
@@ -213,12 +253,21 @@ fn main() {
     let mut graph = Graph::new();
     graph.load(path);
     println!("Arquivo carregado com sucesso!");
-    let some_v = graph.find_by_id(1);
+    let some_v = graph.find_by_id(0);
     let neighbours = graph.get_neighbours(some_v.clone());
     for v in neighbours {
-        println!("Vertex: {}, Neighbors{}", some_v.name, v.name)
+        println!("Vertex: {}, Neighbors{}", some_v.id, v.id)
     }
     graph.detect_scc();
     
     graph.topological_order();
+    
+    let path = String::from("./../tests/arvore_geradora_minima/agm_tiny.net");
+    let mut tree = Graph::new();
+    tree.load(path);
+    println!("Arquivo carregado com sucesso!");
+ 
+    let (cost, mst) = graph.prims(0);
+    println!("{}", cost);
 }
+
