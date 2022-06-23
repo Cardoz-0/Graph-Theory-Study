@@ -1,0 +1,53 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{indentfirst, listings, graphicx, float, hyperref}
+
+\title{INE5413 - Atividade 2}
+\author{Gabriel da Silva Cardoso e Hans Buss Heidemann}
+\date{Maio 2022}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    % pdfpagemode=FullScreen,
+    }
+    
+\urlstyle{same}
+
+\begin{document}
+
+\maketitle
+
+\section{Código-fonte}
+
+O código utilizado esta disponível no Github em  \url{https://github.com/Cardoz-0/Graph-Theory-Study}
+
+
+\section{Representação}
+A linguagem escolhida para este trabalho foi Rust por termos tido dificuldade entre os integrantes utilizando python, além disso tivemos como o objetivo aprender uma nova linguagem durante a implementação, Rust não é uma linguagem orientada a objeto, embora podemos reproduzir certas práticas utilizando structs. Para representar o problema foram utilizadas cinco structs:
+
+\begin{itemize}
+    \item Graph: Contém apenas os vértices e as arestas. Ambas são armazenadas em  vetores.
+    \item Vertex: Os vértices contém informações sobre o seu rótulo e suas arestas, com seus ids e nomes. 
+    \item Edge: As arestas são estruturas que apontam para o vertice de entrada e o de saída, junto com o seu peso.
+    \item AuxNodeSCC: Utilizado no algoritmo de Componente Fortemente Conexas (SCC), contem informações sobre lugares na stack e vértices visitados.
+    \item VisitableNode: Utilizado para sabermos se um vértice foi visitado ou não, aponta para o vetor em questão e possui uma marcação booleana.
+    \item OrderedNode: Utilizado no algoritmo de Ordenação Topológica, aponta para um VisitableNode e possui o lugar na lista ordenada.
+\end{itemize}
+
+Foram utilizadas algumas funções auxiliares para mostrar o resultado por meio de texto no console, como \textit{vertice-to-index}, que transforma objetos de vertice da lista em posições, facilitando a visualização.
+
+\section{Componentes Fortemente Conexas}
+
+Para implementar o algoritmo de detecção de Componentes Fortemente Conexas foi utilizada um vetor de estruturas AuxNodeSCC. Tal estrutura contém informações como quais vertices que já foram visitados pelo algorimto ou  sua profundida no grafo. 
+Por ser um algoritmo sem peso ele se torna bastante simples, logo, não precisa de muitas estruturas de dados.
+
+\section{Ordenação Topológica}
+Nesta implementação utilizamos somente um vetor de OrderedNode's, itineramos por ele realizando um busca profunda de ordenação até todos os vertices terem sidos visitados, depois disso ordenamos a lista que estara ordenada.
+
+\section{Prim}
+O algoritmo de Prim necessitou que utilizazemos três estruturas, um vetor de VisitableNode para nos auxiliar com os vértices já visitados, um vetor de Edge que representa as arestas presentes na Árvore Geradora Minima, além de um VecDeque, utilizado como uma fila para os vertices que ainda nãoforam visitados.
+
+Foi o algoritmo que mais necessitou de estruturas devido a se tratar de um gráfico ponderado, necessitando que mantessemos mais informações auxiliares do que nos anteriores.
+\end{document}

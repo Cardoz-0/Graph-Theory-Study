@@ -1,0 +1,52 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{indentfirst, listings, graphicx, float, hyperref}
+
+\title{INE5413 - Atividade 1}
+\author{Gabriel da Silva Cardoso e Hans Buss Heidemann}
+\date{Maio 2022}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    % pdfpagemode=FullScreen,
+    }
+    
+\urlstyle{same}
+
+\begin{document}
+
+\maketitle
+
+\section{Código-fonte}
+
+O código utilizado esta disponível no Github em  \url{https://github.com/Cardoz-0/Graph-Theory-Study}
+
+
+\section{Representação}
+A linguagem escolhida para este trabalho foi Python pela sua agilidade de implementação, que é uma linguagem orientada a objeto. Para representar o problema foram utilizadas três classes:
+
+\begin{itemize}
+    \item Graph: Contém apenas os vértices e informação sobre ser dirigido ou não. A classe grafo que acessará os vértices para adicionar as arestas. Vale ressaltar que os vertices são armazenados em lista, logo podem ser representados na forma de um index.
+    \item Vértice: Os vértices contém informações sobre o seu rótulo e suas arestas, também em forma de lista 
+    \item Edge: As arestas são objetos que apontam para o vertice de entrada e o de saída, junto com o seu peso.
+\end{itemize}
+
+Foram utilizadas algumas funções auxiliares para mostrar o resultado por meio de texto no console, como \textit{vertice-to-index}, que transforma objetos de vertice da lista em posições, facilitando a visualização.
+
+\section{Breadth-First Search}
+
+Para implementar o algoritmo de busca em largura foi utilizada uma fila e uma lista. A lista mantém informações sobre os vertices que já foram visitados pelo algorimto e a fila adiciona os vertices que devem ser visitados (caso já não tenham sido) nas próximas iterações do algoritmo. 
+Por ser um algoritmo sem peso ele se torna bastante simples, logo, não precisa de muitas estruturas de dados.
+
+\section{Hierholzer Algorithm}
+Para detectar um ciclo euleriano utiliza-se apenas uma lista de nodos visitados, como no exercicio anterior e uma lista auxiliar para saber os vertices que pertecem ao ciclo.
+
+\section{Dijkstra}
+Para o algoritmo de Dijkstra experimentou-se usar dicionarios para poder acessar as informações sobre o nodo diretamente com o seu objeto, sem precisar fazer uma transformação para index. Esses dicionários mantém informações sobre distancia e melhor caminho cara cada vertice do grafo. Alem disso, foi utilizada novamente uma lista de nodos visitados. Como resultado do uso de dicionario, foi precisado de um código extra para conseguir transformar a saida em texto no terminal.
+
+\section{Floyd-Warshall}
+Floyd-Warshall utiliza como principal estrutura de dados uma lista \texit{uv} para manter informações sobre os pares de caminhos. No caso de nossa implementação, ao invés de uma matriz é utilizado um dicionario com todos os pares de entradas, por simplicidade na implementação. Por floyd warshall ser uma implementação mais simples, não são necessárias outras estruturas de dados
+
+\end{document}
