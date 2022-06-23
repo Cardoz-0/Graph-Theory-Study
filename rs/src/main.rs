@@ -5,6 +5,8 @@ use std::io::BufReader;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::collections::VecDeque;
+use std::io;
+use std::io::Write;
 
 #[derive(PartialEq)]
 struct Vertex {
@@ -260,14 +262,28 @@ fn main() {
     }
     graph.detect_scc();
     
-    graph.topological_order();
-    
+    let _toporder = graph.topological_order();
+    for t in &_toporder {
+        if t.pos == _toporder.len() - 1 { 
+            println!("{} ", t.visitable.v.name);
+            }
+        else {
+            print!("{} -> ", t.visitable.v.name);
+            io::stdout().flush().unwrap(); 
+    }
+    }
+
     let path = String::from("./../tests/arvore_geradora_minima/agm_tiny.net");
     let mut tree = Graph::new();
     tree.load(path);
     println!("Arquivo carregado com sucesso!");
  
-    let (cost, mst) = graph.prims(0);
+    let (cost, mst) = tree.prims(0);
     println!("{}", cost);
+    for i in &mst {
+        print!("{} - {}, ", i.u.id, i.v.id);
+        io::stdout().flush().unwrap(); 
+    }
+
 }
 
