@@ -174,7 +174,7 @@ impl Graph {
             }
 
             if stack[at].lowest == stack[at].node.v.id {
-                for i in at..stack.len() {
+                for i in at + 1..stack.len() {
                     if stack[i].on_stack {
                         stack[i].on_stack = false;
                         stack[i].lowest = stack[at].lowest;
@@ -270,7 +270,7 @@ impl Graph {
 }
 
 fn main() {
-    let path = String::from("./../tests/dirigidos/simpsons_amizades1.net");
+    let path = String::from("./../tests/dirigidos/dirigido2.net");
     let mut graph = Graph::new();
     graph.load(path);
     println!("Arquivo manha.net carregado com sucesso!");
