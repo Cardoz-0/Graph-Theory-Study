@@ -34,4 +34,6 @@ for key, value in floyd.items():
         distances += str(grafo.vertice_to_index(i[0])) + ","
     print(grafo.vertice_to_index(key), ":", distances[:-1])
 
-            
+manha = Graph(False)
+manha.load("./../tests/dirigidos/manha.net")
+manha.render()

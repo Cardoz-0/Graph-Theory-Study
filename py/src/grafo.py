@@ -55,11 +55,12 @@ class Graph:
         file = open(filename, "r")
         txt = file.readlines()
         file.close()
-
         self.__qtdVertices = int(txt[0].replace("*vertices ", ""))
-
-        end_of_vertices = txt.index("*edges\n")
-
+        try:
+            end_of_vertices = txt.index("*edges\n")       
+        except Exception:
+            end_of_vertices = txt.index("*arcs\n")   
+       
         for i in range(1, end_of_vertices): # Vertice loader
             vertice_name = txt[i].replace(str(i)+' ', "").replace('"', "").replace("\n", "")
             self.__vertices.append(Vertice(vertice_name))
