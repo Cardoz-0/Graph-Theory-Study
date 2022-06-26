@@ -1,12 +1,10 @@
 use std::cmp::min;
+use std::collections::VecDeque;
 use std::fs;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::ops::Deref;
 use std::rc::Rc;
-use std::collections::VecDeque;
-use std::io;
-use std::io::Write;
 
 #[derive(PartialEq)]
 struct Vertex {
@@ -64,7 +62,7 @@ impl Graph {
     fn find_by_pos(&self, pos: usize) -> Rc<Vertex> {
         Rc::clone(&self.verts[pos])
     }
-    
+
     pub fn load(&mut self, path: String) {
         let file = fs::File::open(path).expect("Não foi possível carregar arquivo");
         let mut buf_reader = BufReader::new(file);
@@ -92,18 +90,19 @@ impl Graph {
                 let vec: Vec<&str> = line.splitn(2, ' ').collect();
 
                 let v = Vertex {
-                    id: vec[0].parse::<usize>().unwrap()-1,
+                    id: vec[0].parse::<usize>().unwrap() - 1,
                     name: vec[1].to_string(),
                 };
                 self.add_vertex(Rc::new(v));
             } else {
-                let vec: Vec<&str> = line.splitn(3, ' ').collect(); 
-                if vec.len() == 1 { //caso o arquivo termine com um newline
+                let vec: Vec<&str> = line.splitn(3, ' ').collect();
+                if vec.len() == 1 {
+                    //caso o arquivo termine com um newline
                     continue;
                 }
-                
-                let v = self.find_by_pos(vec[0].parse::<usize>().unwrap()-1);
-                let u = self.find_by_pos(vec[1].parse::<usize>().unwrap()-1);
+
+                let v = self.find_by_pos(vec[0].parse::<usize>().unwrap() - 1);
+                let u = self.find_by_pos(vec[1].parse::<usize>().unwrap() - 1);
                 let w = vec[2].parse::<f32>().unwrap();
                 self.add_edge(Rc::new(Edge {
                     v: Rc::clone(&v),
@@ -137,9 +136,12 @@ impl Graph {
 
         for v in &self.verts {
             stack.push(AuxNodeSCC {
-                node: VisitableNode{v: Rc::clone(&v), visited: false},
+                node: VisitableNode {
+                    v: Rc::clone(&v),
+                    visited: false,
+                },
                 on_stack: false,
-                lowest: 1, // Arquivos de testes utilizam 1 para indexar o primeiro elemento
+                lowest: 0,
             })
         }
         for i in 0..stack.len() {
@@ -148,7 +150,7 @@ impl Graph {
             }
         }
         for i in 0..stack.len() {
-            println!("{}", stack[i].lowest);
+            println!("{} - {}", stack[i].node.v.id + 1, stack[i].lowest + 1);
         }
     }
 
@@ -187,16 +189,25 @@ impl Graph {
         }
     }
 
-    fn dfs_toporder(&self, at: usize, nodes: &mut Vec<OrderedNode>, mut last_available: usize) -> usize {
+    fn dfs_toporder(
+        &self,
+        at: usize,
+        nodes: &mut Vec<OrderedNode>,
+        mut last_available: usize,
+    ) -> usize {
         nodes[at].visitable.visited = true;
         for neighbour in self.get_neighbours(Rc::clone(&nodes[at].visitable.v)) {
-            let orderable_neighbour = nodes.iter().find(|x| x.visitable.v.id == neighbour.id).unwrap();
+            let orderable_neighbour = nodes
+                .iter()
+                .find(|x| x.visitable.v.id == neighbour.id)
+                .unwrap();
             if !orderable_neighbour.visitable.visited {
-                last_available = self.dfs_toporder(orderable_neighbour.visitable.v.id, nodes, last_available); 
-            }   
+                last_available =
+                    self.dfs_toporder(orderable_neighbour.visitable.v.id, nodes, last_available);
+            }
         }
         nodes[at].pos = last_available;
-        return last_available-1;
+        return last_available - 1;
     }
 
     pub fn topological_order(&self) -> Vec<OrderedNode> {
@@ -204,16 +215,18 @@ impl Graph {
 
         for v in &self.verts {
             stack.push(OrderedNode {
-                visitable: VisitableNode {v: Rc::clone(&v),visited: false},
-                pos: 0
-                }
-            )
+                visitable: VisitableNode {
+                    v: Rc::clone(&v),
+                    visited: false,
+                },
+                pos: 0,
+            })
         }
         let last_available = stack.len();
-        
+
         for at in 0..stack.len() {
             if !stack[at].visitable.visited {
-                    self.dfs_toporder(at, &mut stack, last_available);
+                self.dfs_toporder(at, &mut stack, last_available);
             }
         }
         stack
@@ -223,14 +236,20 @@ impl Graph {
         let mut stack: Vec<VisitableNode> = Vec::new();
 
         for v in &self.verts {
-            stack.push(VisitableNode {v: Rc::clone(&v),visited: false});
+            stack.push(VisitableNode {
+                v: Rc::clone(&v),
+                visited: false,
+            });
         }
 
         let mut mst_edges: Vec<Rc<Edge>> = Vec::new();
         let mut pq: VecDeque<Rc<Edge>> = VecDeque::new();
-        stack[0].visited = true;
-        self.get_edges(self.find_by_id(0)).iter().for_each(
-            |e| if !stack[e.u.id].visited {pq.push_back(Rc::clone(e))}); 
+        stack[s].visited = true;
+        self.get_edges(self.find_by_id(0)).iter().for_each(|e| {
+            if !stack[e.u.id].visited {
+                pq.push_back(Rc::clone(e))
+            }
+        });
 
         let total_edges = &self.verts.len() - 1;
         let mut mst_cost = 0.0;
@@ -241,49 +260,47 @@ impl Graph {
                 mst_cost += edge.w;
 
                 stack[edge.u.id].visited = true;
-                self.get_edges(self.find_by_id(0)).iter().for_each(
-                    |e| if !stack[e.u.id].visited {pq.push_back(Rc::clone(e))});
-
+                self.get_edges(self.find_by_id(0)).iter().for_each(|e| {
+                    if !stack[e.u.id].visited {
+                        pq.push_back(Rc::clone(e))
+                    }
+                });
             }
         }
         (mst_cost, mst_edges)
-    }    
+    }
 }
 
 fn main() {
     let path = String::from("./../tests/dirigidos/manha.net");
     let mut graph = Graph::new();
     graph.load(path);
-    println!("Arquivo carregado com sucesso!");
-    let some_v = graph.find_by_id(0);
-    let neighbours = graph.get_neighbours(some_v.clone());
-    for v in neighbours {
-        println!("Vertex: {}, Neighbors{}", some_v.id, v.id)
-    }
+    println!("Arquivo manha.net carregado com sucesso!");
+
     graph.detect_scc();
-    
+
     let _toporder = graph.topological_order();
     for t in &_toporder {
-        if t.pos == _toporder.len() - 1 { 
+        if t.pos == _toporder.len() - 1 {
             println!("{} ", t.visitable.v.name);
-            }
-        else {
+        } else {
             print!("{} -> ", t.visitable.v.name);
-            io::stdout().flush().unwrap(); 
-    }
+        }
     }
 
     let path = String::from("./../tests/arvore_geradora_minima/agm_tiny.net");
     let mut tree = Graph::new();
     tree.load(path);
-    println!("Arquivo carregado com sucesso!");
- 
+    println!("Arquivo agm_tiny.net carregado com sucesso!");
+
     let (cost, mst) = tree.prims(0);
     println!("{}", cost);
-    for i in &mst {
-        print!("{} - {}, ", i.u.id, i.v.id);
-        io::stdout().flush().unwrap(); 
+    let it = &mut mst.iter().peekable();
+    while let Some(i) = it.next() {
+        if it.peek().is_none() {
+            println!("{} - {}", i.u.id + 1, i.v.id + 1);
+        } else {
+            print!("{} - {}, ", i.u.id + 1, i.v.id + 1);
+        }
     }
-
 }
-
