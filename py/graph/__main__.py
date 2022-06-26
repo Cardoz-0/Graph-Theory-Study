@@ -1,4 +1,4 @@
-from src.grafo import Graph
+from graph import Graph
 from collections import OrderedDict
 
 grafo = Graph(False)

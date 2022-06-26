@@ -11,4 +11,4 @@ This repository uses poetry for dependency management. Learn more in https://pyt
 
 <b>Execute:</b>
 
-        poetry run python atividade1.py
+        poetry run python graph
