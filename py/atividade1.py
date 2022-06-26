@@ -16,7 +16,7 @@ print(grafo.vertices_to_index(cicle))
 
 # Dijkstra 
 grafo = Graph(False)
-grafo.load("./tests/caminho_minimo/fln_pequena.net")
+grafo.load("./../tests/caminho_minimo/fln_pequena.net")
 print("\nDijkstra")
 start_node = grafo.getVertice(0)
 (previous_nodes, shortest_path) = grafo.dijikstra(start_node)
