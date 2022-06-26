@@ -131,7 +131,7 @@ impl Graph {
         result
     }
 
-    pub fn detect_scc(&self) -> () {
+    pub fn detect_scc(&self) -> Vec<AuxNodeSCC> {
         let mut stack: Vec<AuxNodeSCC> = Vec::new();
 
         for v in &self.verts {
@@ -149,9 +149,7 @@ impl Graph {
                 self.dfs_scc(i, &mut stack);
             }
         }
-        for i in 0..stack.len() {
-            println!("{} - {}", stack[i].node.v.id + 1, stack[i].lowest + 1);
-        }
+        stack
     }
 
     fn dfs_scc(&self, at: usize, stack: &mut Vec<AuxNodeSCC>) {
@@ -168,7 +166,7 @@ impl Graph {
                             self.dfs_scc(to, stack);
                         }
                         if stack[to].on_stack {
-                            stack[at].lowest = min(stack[at].lowest, stack[to].lowest);
+                            stack[at].lowest = min(stack[to].lowest, stack[at].lowest);
                         }
                         break;
                     }
@@ -176,10 +174,10 @@ impl Graph {
             }
 
             if stack[at].lowest == stack[at].node.v.id {
-                for i in 0..stack.len() {
+                for i in at..stack.len() {
                     if stack[i].on_stack {
                         stack[i].on_stack = false;
-                        stack[i].lowest = stack[at].node.v.id;
+                        stack[i].lowest = stack[at].lowest;
                         if i == at {
                             break;
                         }
@@ -232,7 +230,7 @@ impl Graph {
         stack
     }
 
-    pub fn prims(&self, s: usize) -> (f32, Vec<Rc<Edge>>) {
+    pub fn prim(&self, s: usize) -> (f32, Vec<Rc<Edge>>) {
         let mut stack: Vec<VisitableNode> = Vec::new();
 
         for v in &self.verts {
@@ -272,16 +270,22 @@ impl Graph {
 }
 
 fn main() {
-    let path = String::from("./../tests/dirigidos/manha.net");
+    let path = String::from("./../tests/dirigidos/simpsons_amizades1.net");
     let mut graph = Graph::new();
     graph.load(path);
     println!("Arquivo manha.net carregado com sucesso!");
 
-    graph.detect_scc();
+    println!("SCC");
+    let stack = graph.detect_scc();
+    println!("id, lowlink");
+    for i in 0..stack.len() {
+        println!("{} - {}", stack[i].node.v.id + 1, stack[i].lowest + 1);
+    }
 
-    let _toporder = graph.topological_order();
-    for t in &_toporder {
-        if t.pos == _toporder.len() - 1 {
+    println!("Topological Order");
+    let toporder = graph.topological_order();
+    for t in &toporder {
+        if t.pos == toporder.len() - 1 {
             println!("{} ", t.visitable.v.name);
         } else {
             print!("{} -> ", t.visitable.v.name);
@@ -292,9 +296,9 @@ fn main() {
     let mut tree = Graph::new();
     tree.load(path);
     println!("Arquivo agm_tiny.net carregado com sucesso!");
-
-    let (cost, mst) = tree.prims(0);
-    println!("{}", cost);
+    println!("Minimum Spanning Tree");
+    let (cost, mst) = tree.prim(0);
+    println!("{} cost", cost);
     let it = &mut mst.iter().peekable();
     while let Some(i) = it.next() {
         if it.peek().is_none() {
