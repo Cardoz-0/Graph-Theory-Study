@@ -251,7 +251,7 @@ impl Graph {
 }
 
 fn main() {
-    let path = String::from("./../tests/dirigidos/manha.net");
+    let path = String::from("./../../tests/dirigidos/manha.net");
     let mut graph = Graph::new();
     graph.load(path);
     println!("Arquivo carregado com sucesso!");
@@ -273,7 +273,7 @@ fn main() {
     }
     }
 
-    let path = String::from("./../tests/arvore_geradora_minima/agm_tiny.net");
+    let path = String::from("./../../tests/arvore_geradora_minima/agm_tiny.net");
     let mut tree = Graph::new();
     tree.load(path);
     println!("Arquivo carregado com sucesso!");
