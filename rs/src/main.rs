@@ -1,3 +1,4 @@
+use clap::{App, Arg};
 use std::cmp::min;
 use std::collections::VecDeque;
 use std::fs;
@@ -270,41 +271,79 @@ impl Graph {
 }
 
 fn main() {
-    let path = String::from("./../tests/dirigidos/dirigido2.net");
-    let mut graph = Graph::new();
-    graph.load(path);
-    println!("Arquivo manha.net carregado com sucesso!");
+    let matches = App::new("Graph Theory")
+        .version("0.3.0")
+        .author("Gabriel da Silva Cardoso <gabriel9225@gmail.com>: Hans Buss Heidemann <hans.buss@mailfence.com>")
+        .about("Implementation of graph theory algorithms for educational purposes")
+        
+        .arg(Arg::with_name("file")
+                 .short('f')
+                 .long("file")
+                 .takes_value(true)
+                 .help("File of the type .net"))
+        
+        .arg(Arg::with_name("scc")
+                 .long("scc")
+                 .takes_value(false)
+                 .help("Detect strongly connected component"))
+       
+        .arg(Arg::with_name("toporder")
+                 .long("toporder")
+                 .alias("topological_sort")
+                 .takes_value(false)
+                 .help("Topological sort of the graph"))
+        
+        .arg(Arg::with_name("mst")
+                 .long("mst")
+                 .takes_value(true)
+                 .help("Minimum Spanning Tree"))
+        
+        .get_matches();
 
-    println!("SCC");
-    let stack = graph.detect_scc();
-    println!("id, lowlink");
-    for i in 0..stack.len() {
-        println!("{} - {}", stack[i].node.v.id + 1, stack[i].lowest + 1);
-    }
+    if matches.is_present("file") {
+        let target = matches.value_of("file").unwrap();
 
-    println!("Topological Order");
-    let toporder = graph.topological_order();
-    for t in &toporder {
-        if t.pos == toporder.len() - 1 {
-            println!("{} ", t.visitable.v.name);
-        } else {
-            print!("{} -> ", t.visitable.v.name);
+        let mut graph = Graph::new();
+        graph.load(target.to_string());
+        if matches.is_present("scc") {
+            let stack = graph.detect_scc();
+            println!("id, lowlink");
+            for i in 0..stack.len() {
+                println!("{} - {}", stack[i].node.v.id + 1, stack[i].lowest + 1);
+            }
         }
-    }
-
-    let path = String::from("./../tests/arvore_geradora_minima/agm_tiny.net");
-    let mut tree = Graph::new();
-    tree.load(path);
-    println!("Arquivo agm_tiny.net carregado com sucesso!");
-    println!("Minimum Spanning Tree");
-    let (cost, mst) = tree.prim(0);
-    println!("{} cost", cost);
-    let it = &mut mst.iter().peekable();
-    while let Some(i) = it.next() {
-        if it.peek().is_none() {
-            println!("{} - {}", i.u.id + 1, i.v.id + 1);
-        } else {
-            print!("{} - {}, ", i.u.id + 1, i.v.id + 1);
+        if matches.is_present("toporder") {
+            let toporder = graph.topological_order();
+            for t in &toporder {
+                if t.pos == toporder.len() - 1 {
+                    println!("{} ", t.visitable.v.name);
+                } else {
+                    print!("{} -> ", t.visitable.v.name);
+                }
+            }
         }
+        if matches.is_present("mst") {
+            let mst_str = matches.value_of("mst");
+            match mst_str {
+                None => println!("Choose a starting node."),
+                Some(s) => match s.parse::<usize>() {
+                    Ok(n) => {
+                        let (cost, mst) = graph.prim(n);
+                        println!("{} cost", cost);
+                        let it = &mut mst.iter().peekable();
+                        while let Some(i) = it.next() {
+                            if it.peek().is_none() {
+                                println!("{} - {}", i.u.id + 1, i.v.id + 1);
+                            } else {
+                                print!("{} - {}, ", i.u.id + 1, i.v.id + 1);
+                            }
+                        }
+                    }
+                    Err(_) => println!("That's not a number! {}", s),
+                },
+            }
+        }
+    } else {
+        print!("No file to load");
     }
 }
